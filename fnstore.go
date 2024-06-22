@@ -16,11 +16,11 @@ type FunctionStore interface {
 }
 
 type FunctionStoreImpl[K comparable] struct {
-	functions map[K]FunctionData
+	Functions map[K]FunctionData
 }
 
 func NewFunctionStore[K comparable]() *FunctionStoreImpl[K] {
-	return &FunctionStoreImpl[K]{functions: make(map[K]FunctionData)}
+	return &FunctionStoreImpl[K]{Functions: make(map[K]FunctionData)}
 }
 func (fs *FunctionStoreImpl[K]) AddFunction(name K, fn interface{}) error {
 	fnValue := reflect.ValueOf(fn)
@@ -28,7 +28,7 @@ func (fs *FunctionStoreImpl[K]) AddFunction(name K, fn interface{}) error {
 		return fmt.Errorf("no function passed")
 	}
 
-	if existingFn, exists := fs.functions[name]; exists && existingFn.Func.Pointer() != fnValue.Pointer() {
+	if existingFn, exists := fs.Functions[name]; exists && existingFn.Func.Pointer() != fnValue.Pointer() {
 		return fmt.Errorf("key %v is already used by a different function", name)
 	}
 
@@ -37,7 +37,7 @@ func (fs *FunctionStoreImpl[K]) AddFunction(name K, fn interface{}) error {
 		inputTypes[i] = fnValue.Type().In(i)
 	}
 
-	fs.functions[name] = FunctionData{
+	fs.Functions[name] = FunctionData{
 		Func:  fnValue,
 		Input: inputTypes,
 	}
@@ -45,7 +45,7 @@ func (fs *FunctionStoreImpl[K]) AddFunction(name K, fn interface{}) error {
 }
 
 func (fs *FunctionStoreImpl[K]) CallFunction(name K, args ...interface{}) ([]interface{}, error) {
-	fnMeta, exists := fs.functions[name]
+	fnMeta, exists := fs.Functions[name]
 	if !exists {
 		return nil, fmt.Errorf("function %v not found", name)
 	}
@@ -69,3 +69,5 @@ func (fs *FunctionStoreImpl[K]) CallFunction(name K, args ...interface{}) ([]int
 	}
 	return outputs, nil
 }
+
+
